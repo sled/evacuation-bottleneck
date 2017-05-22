@@ -1,0 +1,397 @@
+\documentclass[11pt]{article}
+\usepackage{geometry}                
+\geometry{letterpaper}                   
+
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage{natbib}
+\usepackage{verbatim}
+\usepackage{amssymb, amsmath}
+\usepackage[numbered, framed]{mcode}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+%\title{Title}
+%\author{Simon Schmid, Daniel Z\"und}
+%\date{\today} 
+
+\begin{document}
+
+
+\input{cover}
+\newpage
+
+%%%%%%%%%% Agreement n¡1 %%%%%%%%%%%%%%%%%
+\section*{Eigenst\"andigkeitserkl\"arung}
+\bigskip
+
+
+
+\bigskip
+
+
+\large
+Hiermit erkl\"are ich, dass ich diese Gruppenarbeit selbst\"andig verfasst habe,
+keine anderen als die angegebenen Quellen-Hilsmittel verwenden habe, und alle
+Stellen, die w\"ortlich oder sinngem\"ass aus ver\"offentlichen Schriften entnommen
+wurden, als solche kenntlich gemacht habe. Dar\"uber hinaus erkl\"are ich, dass 
+diese Gruppenarbeit nicht, auch nicht auszugsweise, bereits f\"ur andere Pr\"ufung
+ausgefertigt wurde.
+
+\begin{center}
+
+\bigskip
+
+
+\bigskip
+
+
+\begin{tabular}{@{}p{3.3cm}@{}p{6cm}@{}@{}p{6cm}@{}}
+\begin{minipage}{3cm}
+
+\end{minipage}
+&
+\begin{minipage}{6cm}
+\vspace{2mm} \large Daniel Z\"und
+
+ \vspace{\baselineskip}
+
+\end{minipage}
+&
+\begin{minipage}{6cm}
+
+\large Simon Schmid
+
+\end{minipage}
+\end{tabular}
+
+
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% Agreement n¡2 %%%%%%%%%%%%%%%%%
+
+\newpage
+\section*{Agreement for free-download}
+\bigskip
+
+
+\bigskip
+
+
+\large We hereby agree to make our source code for this project freely available for download from the web pages of the SOMS chair. Furthermore, we assure that all source code is written by ourselves and is not violating any copyright restrictions.
+
+\begin{center}
+
+\bigskip
+
+
+\bigskip
+
+
+\begin{tabular}{@{}p{3.3cm}@{}p{6cm}@{}@{}p{6cm}@{}}
+\begin{minipage}{3cm}
+
+\end{minipage}
+&
+\begin{minipage}{6cm}
+\vspace{2mm} \large Daniel Z\"und
+
+ \vspace{\baselineskip}
+
+\end{minipage}
+&
+\begin{minipage}{6cm}
+
+\large Simon Schmid
+
+\end{minipage}
+\end{tabular}
+
+
+\end{center}
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ 
+
+
+%%%%%%%%%% Table of content %%%%%%%%%%%%%%%%%
+
+\tableofcontents
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+\section{Individual contributions}
+For the implementation, Daniel Z\"und did most of the continuous model and
+Simon Schmid implemented most of the best response dynamics.
+The report was a teamwork of both, both wrote, reviewed each other and
+corrected it.
+
+
+\newpage
+\section{Introduction and Motivations} 
+People tend to form a crowd in states of emergency. The typical flight
+behaviour is moving away from the source of danger. In open space people would
+diffuse in all directions but if there are boundaries like walls or a street
+the only way out is an exit. Usually, exits are small in comparison to the
+crowd so the flow of people through the exit will be larger than the exit's
+capacity. The result manifests itself as a bottleneck. The typical appearance
+of a bottleneck is a semi-circular crowd around the exit. The main objective
+of every evacuation plan is a sufficient amount of exits which are well
+distributed so that the crowd splits up in smaller crowds. The interesting
+point here is that the crowd will not spread evenly because of the individual and
+collective behaviour of human beings.  People tend to head towards known and
+visible exits which aren't crowded. This preference for a specific exit may
+change depending on the circumstances. Our simulation is focused on how people
+chose an exit and how this decision affects the collective behaviour.
+
+\newpage
+\section{Description of the Model}
+\subsection{Model Overview} 
+
+This section is a brief description of the model we implemented. We have
+chosen a continous model for our simulation. The benefit of a continuous
+simulation is that infinitesimal movements are possible and we think, it
+shows the movement of people in a more natural way. 
+
+The room is a two dimensional space, which includes three different types of
+agents. The first are the people, which need to be evacuated, and the second
+are the wall elements. The third kind are the door agents, which define a door.
+The big difference between the three kinds, is that the door and wall
+agents can not move.
+The agents on the other side, need to move, so that they can get out of the
+room. They move according to potentials, in whose radius they are. Since we
+are working with potential fields, the agents want to go into the direction of
+the negative gradient of the sum of all fields. This is mathematically
+described as:
+
+\[ m\frac{\delta^2 x_p}{\delta t^2}  = - \sum^{N}_{q = 1, q \neq p}
+\nabla_{x_p} V_{agent}(|x_p - x_q|) - \nabla_{x_p} V_{door}(|x_p - x_q|) 
+- \sum^{W}_{q = 1} \nabla_{x_p} V_{wall}(|x_p - x_q|)\]
+where
+\begin{itemize}
+	\item $V_{agent}$ \ldots potential-field of other people.	
+	\item $V_{wall}$ \ldots potential-field of wall elements.
+	\item $V_{door}$ \ldots potential-field of the door, an agent is heading
+	for.
+\end{itemize}
+Since the wall and door elements do not move, they build a static field
+together. The dynamic part of the field comes from the moving people.
+Each person in the room induces a field, that repels the other agents. So this
+one has a strong influence on how the people move in the room.
+In other words, the doors and walls introduce a static field on the whole
+room, and the people a dynamic field. This allows us to simulate realistic
+escape dynamics.
+
+The model is chosen according to a homework from the lecture \textit{Simulations
+using Particles} by Prof. Petros Koumoutsakos.
+
+It is known, that people try to follow each others, as long as there is a
+constant flow. Once the flow stagnates, it is a matter of patience before
+people start to panic. In this situation people push each other towards the
+exit, trying to get out of the room. Instead of moving on faster this
+behaviour will cause clogging. If this happens people on the margin of the
+crowd will perhaps reconsider their decision an move away from the crowded
+exit to an uncrowded one, even if the door was familiar to them. In conclusion
+this means people will follow only moving people.
+
+In our model, the people choose their door according to some game theoretical
+approach \cite{BestResponseDynamics}. The agents will calculate the opportunity costs of each exit by
+weighting the queue in front of the door, the distance to the door and
+individual preference factors like familiarity and visibility of the door. The
+individual preference factors and velocities are distributed randomly on
+initialization.
+
+\input{dani}
+\input{simon}
+
+\input{implementation}
+
+\newpage
+\section{Simulation Results and Discussion}
+The basic configuration of the simulation consists of a square room with a
+side length of ten units. There are three evenly spread exits, located on the
+west side. The exits are all of the same width and a capacity of one agent
+per timestep. The simulation has two scenarios, the first one is an empty room
+without any obstacles and the second scenario uses the same room geometry but
+there is a pile in the front of every door. The piles are modelled as square
+blocks with a sidelength of one unit. They use the same repulsive force as the
+wall does. (see figure \ref{rooms})
+
+There are five cases with 100, 200, 300, 400 and 500 agents. Every test case
+consists of twelve runs. The average of these twelve runs will be used in the
+analysis.
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{../graphen/raum_ohne_piles.jpg}
+	\includegraphics[width=0.5\textwidth]{../graphen/raum_mit_piles.jpg}
+	\caption{The rooms with and without piles used in the simulation.}
+	\label{rooms}
+\end{figure}
+\subsection{Exit Time Comparison}
+We see some differences between the two room configurations. In the
+configuration with the piles, it takes longer until the people start to
+leave the room. We think the reason may be that everybody has a direct way
+to the doors and the doors are visible to all if there are no piles. This
+means if the door is in sight, the people can estimate the queueing time so 
+they are able to choose the door with best response in the first place.
+By having piles, the people only know the route to doors they are familiar to.
+If people get behind the piles all doors are in the line of sight. This means
+the possibilites of choosing an exit expands rapidly and the frequency of 
+redicisions increases. An other explanation for the slower evacuation in
+the pile scenario may be that the pressure on the doors is lower. This causes
+a smaller force acting on the people which results in a slower evacuation.
+In figure \ref{noPileTimes} and \ref{pileTimes} one can see the number of people in the room versus
+the time.
+\begin{figure}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../graphen/agents_ohne_piles.png}
+	\caption{Exit times for different numbers of people in the room without
+	piles}
+	\label{noPileTimes}
+\end{figure}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../graphen/agents_mit_piles.png}
+	\caption{Exit times for different numbers of people in the room with piles}
+	\label{pileTimes}
+\end{figure}
+\subsection{Decisions}
+We also have some plots were one can see, how many people changed their mind
+per timestep. Here we can see a big difference between the two room
+configurations. When we have piles, the number of people changing the door is
+much smaller then without the piles but it goes much longer until we have a
+small number of redecisions (figure \ref{noPileDecision} and \ref{pileDecision}).
+We think this makes perfectly sense, since due to the exit selection we
+implemented, a person which does not know something about a door and does not
+see it, would not go to that door even if it was nearest. We think this is how
+people would act in reality too.
+\begin{figure}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../graphen/decisions_ohne_piles_2.png}
+	\caption{Number of redecisions of persons in the room without piles}
+	\label{noPileDecision}
+\end{figure}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../graphen/decisions_mit_piles_2.png}
+	\caption{Number of redecisions of persons in the room with piles}
+	\label{pileDecision}
+\end{figure}
+
+\newpage
+\section{Summary and Outlook}
+A continuous model for evacuation scenarios was implemented. By running the
+software, we get some charactersitics of the crowd, which also happen in
+reality. Additionally, the choosing of the door was done by best response
+dynamics. Which is a game theoretical approach. 
+The implemented model shows crowd characteristics, such as the circular form of the
+crowd in front of a door, the redecition of the preferred door of people in
+the crowd and more.
+
+For further work, one could possibly implement the model with different
+potential fields instead of the ones used. Also one could extend the static
+fields in such a way, that the geometry can be more complex then it is in our
+cases.
+
+As a comparison, one could take the results from social experiments \cite{LianaManukyan} for
+choosing the door and look if they give the same result. One example of such
+an experiment gave the following evacuation strategies:
+\begin{enumerate}
+	\item I escaped according to the signs and instructions, and also
+	broadcast or guide by shop-girls (46.7\%). 
+	\item I chose the opposite direction to the smoking area to escape from
+	the fire as soon as possible (26.3\%).
+	\item I used the door because it was the nearest one (16.7\%).
+	\item I just followed the other persons (3.0\%).
+	\item I avoided the direction where many other persons go (3.0\%).
+	\item There was a big window near the door and you could see outside. It
+	was the most "bright" door, so I used it (2.3\%).
+	\item I chose the door which I am used to (1.7\%).
+\end{enumerate}
+
+
+
+\newpage
+\begin{thebibliography}{20}
+\bibitem{ExtendedFloorField} K. Nishinari, A. Kirchner, A. Namazi and A. Schadschneider. 'Extended
+floor field CA model for evacuation dynamics.' IEICE Trans Inf Syst (Inst
+Electron Inf Commun Eng) VOL.E87-D;NO.3 (2006) pp(726-732).
+
+\bibitem{FrictionEffects} A. Kirchner, K. Nishinari and A. Schadschneider. 'Friction effects
+and clogging in a cellular automaton model for pedestrian dynamics.' PHYSICAL
+REVIEW E67 056122(2003)
+
+\bibitem{AnalyticalApprocach} D. Helbing, A. Johansson, J. Mathiesen, M. H. Jensen, and A. Hansen.
+'Analytical Approach to Continuous and Intermittent Bottleneck Flows.'
+PHYSICAL REVIEW LETTERS PRL 97 168001 (2006)
+
+\bibitem{Centrifugal} W. J. Yu, R. Chen, L. Y. Dong, and S. Q. Dai. 'Centrifugal force
+model for pedestrian dynamics'. PHYSICAL REVIEW E72 026112 (2005)
+
+\bibitem{Dynamical}Takashi Nagatani 'Dynamical transition and scaling in a mean-field
+model of pedestrian flow at a bottleneck' Physica A 300 (2001) pp(558-566)
+
+\bibitem{BestResponseDynamics} Harri Ehtamo , Simo Heli\"ovaara1 , Simo
+Hostikka , Timo Korhonen. 'Modeling Evacuees Exit Selection with Best
+Response Dynamics'. Fire Safety Journal, Volume 41, Issue 5, July 2006, Pages 364-369
+
+\bibitem{InternalObstacles} Hai-Jun Huang, Ren-Yong Guo. 'Static Floor Field and
+exit choice for pedestrian evacuation in rooms with internal obstacles
+and multiple exits'. Phys. Rev. E 78, 021131 (2008)
+
+\bibitem{CollectivePenomena} Andreas Schadschneider , Ansgar Kirchner ,
+Katsuhiro Nishinari. 'CA Approach to Collective Phenomena in
+Pedestrian Dynamics'. Lecture Notes In Computer Science; Vol. 2493 (2002)
+pp(239-248)
+
+\bibitem{LianaManukyan} Liana Manukyan, 'Evacuation Bottleneck', 
+Modelling and Simulating Social Systems with MATLAB, ETH Zurich, December 2009
+\end{thebibliography}
+\newpage
+\begin{center}
+	\LARGE Appendix A: Matlab Code
+\end{center}
+
+\lstinputlisting{../code/main.m}
+\lstinputlisting{../code/debug.m}
+\lstinputlisting{../code/simulation.m}
+\lstinputlisting{../code/force.m}
+\lstinputlisting{../code/basic2.m}
+\lstinputlisting{../code/potAgent.m}
+\lstinputlisting{../code/potWall.m}
+\lstinputlisting{../code/potDoor.m}
+\lstinputlisting{../code/distance_time.m}
+\lstinputlisting{../code/get_queue_count.m}
+\lstinputlisting{../code/is_vis.m}
+\lstinputlisting{../code/is_fam.m}
+\lstinputlisting{../code/init1.m}
+\lstinputlisting{../code/init2.m}
+\lstinputlisting{../code/init3.m}
+\lstinputlisting{../code/init4.m}
+\lstinputlisting{../code/init5.m}
+\lstinputlisting{../code/plotField.m}
+\lstinputlisting{../code/plotStats.m}
+
+%\newpage
+%\begin{center}
+%	\LARGE Appendix B: Leveleditor
+%\end{center}
+%\Large index.html
+%\verbatiminput{../leveleditor/index.html}
+%\Large script.js
+%\verbatiminput{../leveleditor/script.js}
+
+\end{document}  
+
+
+
+ 

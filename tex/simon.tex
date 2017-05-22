@@ -1,0 +1,134 @@
+
+\section{Exit Selection}
+In emergency evcuation, the selection of the exit route is one of the most
+important decisions. We take this into account in our simulation by the
+implementation of the paper "Exit Selection with Best Response Dynamics"
+\cite{BestResponseDynamics}. The paper describes an algorithm about how people
+choose an appropriate exit based on the game theoretic concept of best
+response dynamics. In the model the agents are the player and the strategies
+are the possible target exits.
+
+We assume that agents will select the fastest evacuation route. Despite of the
+time related factor we include two other factors: familiarity and visibility
+of the exits. The estimated evacuation time of an agent is the sum of the
+estimated moving time and the estimated queueing time. The estimated moving
+time is estimated simply by dividing the distance to the exit by the velocity
+of the agent. The estimated queuing time depends on the exit's capacity and on
+the number of the other agents that are heading towards the exit and are
+closer to it than the agent itself. The estimated queuing time binds the
+decision of a single agent to the decision of other agents. In conclusion,
+this means the fastest exit route for a specific agent may change during the
+evacuation.
+
+The familiarity and visibility factor constrain the set of possible exits.
+These factors can be seen as binary flags and the number of possible
+combinations form the preference groups. Every door will be divided into a
+preference group. Agents will select an exit from the nonempty group that has
+the best preference. The doors in other preference groups are not of any
+interest.
+
+\subsection{Mathematical Formulation of the Model}
+The agents are refered with indices $i$ and $j$, where $i,j \in \mathcal{N} =
+\{1,2,3,...,N\}$. Exits can be seen as strategies, exits are denoted by $e_k,
+k \in \mathcal{K} = \{1,2,...,K\}$. Strategies are denoted by $s_i \in
+\{e_1,...,e_K\} = S_i, i \in \mathcal{N}$ where $S_i$ is a strategy set.
+
+The agent's strategies are concluded by \[s := (s_{1},...,s_{N}) \in S_{1}
+\times \cdot\cdot\cdot \times S_{N} = S \]  The strategies of all other agents
+but agent $i$ is defined by \[s_{-i} := (s_{i},...,s_{i-1},s_{i+1},...,s_{N})
+\in S_{-i}\] The estimated moving time depends on the agent $i$'s position
+$\mathbf{r}_i$ and the exit $e_k$'s position $\mathbf{b}_k$. The positions of
+the agents are in the set $\mathbf{r} := (\mathbf{r}_1,...,\mathbf{r}_N)$. So
+the distance between agent $i$ and the exit $e_k$ is \[d(e_{k};\mathbf{r}_i) =
+||\mathbf{r}_i - \mathbf{b}_k||\] The estimated moving time is the division of
+the distance $d(e_{k};\mathbf{r}_i)$ by agent $i$'s velocity $v^{0}_i$
+\[\tau_i(e_k;\mathbf{r}_i) = \frac{1}{v^{0}_i}d(e_k;\mathbf{r}_i)\] The
+estimated queueing time is defined by the sum of all agents but agent $i$
+heading towards exit $e_k$ and are closer to exit $e_k$ divided by the exit
+$e_k$'s capacity $\beta_k$.
+
+The subset of all agents $j \ne i$ who are closer to $e_k$ than agent $i$ is
+given by \[\Lambda_i(e_k, s_{-i};\mathbf{r}) = \{j \ne i | s_j = e_k,
+d(e_k;\mathbf{r}_j) \le d(e_k;\mathbf{r}_i)\}\] The number of elements in the
+subset $\Lambda_i(e_k, s_{-i};\mathbf{r})$ is denoted by
+\[\lambda_i(e_k,s_{-1};\mathbf{r}) = |\Lambda_i(e_k, s_{-i};\mathbf{r})| \]
+The exit $e_k$'s capacity $\beta_k$ is a scalar value telling us how many
+agents can pass the exit $e_k$ at once.
+
+So the estimated queueing time is
+\[\frac{1}{\beta_k}\lambda_i(e_k,s_{-1};\mathbf{r}) = |\Lambda_i(e_k, s_{-i};\mathbf{r})|\]
+The sum of the estimated moving time and estimated queueing time gives us the
+estimated evacuation time for agent $i$ through the exit $e_k$
+\[T_i(s_i, s_{-i};\mathbf{r}) = \frac{1}{\beta_k}\lambda_i(e_k,s_{-1};\mathbf{r}) + \tau_i(e_k;\mathbf{r}_i)\]
+As a result of the game theoretic principle, the strategy of agent $i$ is the
+best response to the other agents' strategies. This means every agent will
+choose the exit which has the lowest evacuation time.
+\[s_i = BR_i(s_{-i};\mathbf{r}) = \arg \underset{s^{\prime}_i \in S_i}{\min} T_i(s^{\prime}_i,s_{-i};\mathbf{r}) \]
+As we have mentioned before the effects of familiarity and visibility of exits
+can constrain the group of possible exits for agent $i$, these conditions are
+taken into account by defining two binary flags
+\[fam_i(e_k),\ vis(e_k;\mathbf{r_i}),\quad \forall\ i \in \mathcal{N}, k \in K\]
+The binary flags give certain information about agent $i$:
+\[fam_i(e_k) \ = \ 
+\begin{cases} 
+1 & \text{if exit\ } e_k \text{\ is familiar to agent\ } i \\
+0 & \text{if exit\ } e_k \text{\ is not familiar to agent\ } i
+\end{cases}\]
+\[vis(e_k; \mathbf{r}_i) = \ 
+\begin{cases} 
+1 & \text{if exit\ } e_k \text{\ is visible to agent\ } i \\
+0 & \text{if exit\ } e_k \text{\ is not visible to agent\ } i
+\end{cases}\]
+These factors are the criterias for dividing the exits in to groups with
+preference numbers. There are four possible combinations which means there are
+four groups of exits with preference numbers from one to four. The smaller the
+preference number is, the more preferable the exit. The familiarity of an exit
+has a bigger influence about how preferable an exit is. Studies have shown
+that evacuees prefere familiar routes even if there is a shorter route
+\cite{BestResponseDynamics}. The visibility flag is important for the
+calculation of the estimated queueing time beacause an agent is only able to
+estimate the queue in front of a door if he can see the door.
+
+According to the previous definition the doors will be grouped as shown in the table below.
+\begin{center}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} cccc}
+	\hline
+	Preference number & Exit group &  $vis(e_k; \mathbf{r}_i)$ & $fam_i(e_k)$\\ 
+	\hline
+
+	1 & $E_i(1)$ & 1 & 1\\ 
+
+	2 & $E_i(2)$ & 0 & 1\\ 
+
+	3 & $E_i(3)$ & 1 & 0\\ 
+
+	4 & No Preference & 0 & 0\\
+	\hline
+\end{tabular*}
+\end{center}
+
+\textbf{Table 1} The preference groups in which the exits will be divdided
+into. The smaller the preference number, the more preferable the exit. The
+fourth preference group describes people in panic which are not familiar with
+the exits and can not see any either. \cite{BestResponseDynamics}
+
+Mathematically the selection of the door is defined as
+\[s_i = BR_i(s_{-i};\mathbf{r}) = \arg \underset{s^{\prime}_i \in S_i}{\min} T_i(s^{\prime}_i,s_{-i};\mathbf{r})\]
+\[s^{\prime}_i \in E_i(\overline{z})\]
+The specific agent $i$ chooses an exit from the non-empty Group
+$E_i(\overline{z})$ which has the best preference number $\overline{z}$ for
+him. 
+
+In addition to the paper we added an extra patience factor. The patience
+factor is a simple comparison between the evacuation time of the preferable
+new exit and the previously chosen exit. This is needed because it may happen
+that an exit in a better preference group gets in sight. Despite the fact that
+the exit is in a better preference group the evacuation time could take much
+longer. So the agent will not redecide if the evacuation time of the new
+preferable exit is greater than the evacuation time of the agent's previous
+decision. This could be omitted if the number of exits is significant higher
+than the number of possible preference groups.
+
+
+
+

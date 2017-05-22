@@ -1,0 +1,20 @@
+\section{Implementation}
+The simulation is split into several function files. The main file, where the
+whole simulation is running, is the \textit{simulation.m}. This file needs
+some information of the room, the walls and doors, the agents and so on to
+run. What it exactly needs, can be looked up in the comment of the file.
+To run some different kinds of simulation, we provide with the code some
+\textit{initX.m} ($X \in 1\ldots5$) which construct different examples of
+rooms and place the people at random positions. For an example of a running
+matlab script please have a look at the first element in appendix A.
+
+\subsection{Time Integration}
+For the time integration we do an simple explicit euler. This means that we
+integrate according to the following scheme: 
+\[v_{i+1} = v_i + \delta t \cdot a_i \]
+\[x_{i+1} = x_i + \delta t \cdot v_{i+1}\]
+The $a$ is calculated as it was shown in the introduction of this report: 
+\[ a = \frac{\delta^2 x_p}{\delta t^2}  = \frac{1}{m} \left( - \sum^{N}_{q = 1, q \neq p}
+\nabla_{x_p} V_{agent}(|x_p - x_q|) - \nabla_{x_p} V_{door}(|x_p - x_q|) 
+- \sum^{W}_{q = 1} \nabla_{x_p} V_{wall}(|x_p - x_q|)\right)\]
+
